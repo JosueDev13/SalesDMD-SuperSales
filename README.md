@@ -165,3 +165,17 @@
         AVG(f.ganancia / NULLIF(f.unidades_vendidas, 0)) as ganancia_promedio_por_unidad
     FROM fact_ventas f
     GROUP BY categoria_descuento;
+
+
+
+
+# Adicional
+    
+      SELECT 'dim_producto' AS tabla, COUNT(*) AS filas FROM dim_producto
+      UNION ALL SELECT 'dim_segmento', COUNT(*) FROM dim_segmento
+      UNION ALL SELECT 'dim_pais', COUNT(*) FROM dim_pais
+      UNION ALL SELECT 'dim_tiempo', COUNT(*) FROM dim_tiempo
+      UNION ALL SELECT 'fact_ventas', COUNT(*) FROM fact_ventas;
+
+# Como un select
+    DESCRIBE fact_ventas;
