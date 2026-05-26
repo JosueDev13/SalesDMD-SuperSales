@@ -227,4 +227,17 @@ COPY (
     GROUP BY p.nombre_producto ORDER BY ganancia DESC LIMIT 5
 ) TO '07_analisis_top5_productos.csv' WITH (HEADER);
 
-SELECT '✅ Exportación completada. Revisa los archivos CSV en tu carpeta.' AS mensaje;
+SELECT 'Exportación completada. Revisa los archivos CSV en tu carpeta.' AS mensaje;
+
+
+
+
+
+
+#  Desde DuckDB
+    COPY (
+        SELECT t.año, t.mes_nombre, SUM(f.ventas) AS ventas, SUM(f.ganancia) AS ganancia
+        FROM fact_ventas f JOIN dim_tiempo t ON f.fecha = t.fecha
+        GROUP BY t.año, t.mes_nombre, t.mes_num
+        ORDER BY t.año, t.mes_num
+    ) TO 'datos_graficas.csv' WITH (HEADER);
