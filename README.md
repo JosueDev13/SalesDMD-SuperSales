@@ -178,4 +178,16 @@
       UNION ALL SELECT 'fact_ventas', COUNT(*) FROM fact_ventas;
 
 # Como un select
+
     DESCRIBE fact_ventas;
+
+
+# Vista más detallada
+
+    SELECT 
+        column_name,
+        data_type,
+        is_nullable
+    FROM information_schema.columns 
+    WHERE table_name = 'fact_ventas'
+    ORDER BY ordinal_position;
