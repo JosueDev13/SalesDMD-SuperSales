@@ -40,15 +40,19 @@
 
 # Extraer y cargar los datos (ETL)
 
-# Tabla de hechos (fact table)
+# Verificar datos nulos
+    SELECT 
+        SUM(CASE WHEN "Units Sold" IS NULL THEN 1 ELSE 0 END) as null_units,
+        SUM(CASE WHEN "Sales" IS NULL THEN 1 ELSE 0 END) as null_sales,
+        SUM(CASE WHEN "Profit" IS NULL THEN 1 ELSE 0 END) as null_profit
+    FROM ventas;
 
-    CREATE OR REPLACE TABLE ventas AS 
-    SELECT * FROM read_csv_auto('Supersales_DMD941.csv');
+# Verificar el rango de fechas
 
-# Verificar que se cargó bien
+    SELECT MIN(Date) as fecha_inicio, MAX(Date) as fecha_fin FROM ventas;
 
-    SELECT COUNT(*) FROM ventas;
-    SELECT * FROM ventas LIMIT 10;
+# Verificar si hay profits negativos.
 
+    SELECT COUNT(*) as perdidas FROM ventas WHERE "Profit" < 0;
 
 
