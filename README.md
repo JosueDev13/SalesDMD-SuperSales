@@ -30,8 +30,25 @@
 
     CREATE OR REPLACE TABLE ventas AS 
     SELECT * FROM read_csv_auto('Supersales_DMD941.csv');
+    
 
 # Verificar que se cargó bien
 
     SELECT COUNT(*) FROM ventas;
     SELECT * FROM ventas LIMIT 10;
+
+
+# Extraer y cargar los datos (ETL)
+
+# Tabla de hechos (fact table)
+
+    CREATE OR REPLACE TABLE ventas AS 
+    SELECT * FROM read_csv_auto('Supersales_DMD941.csv');
+
+# Verificar que se cargó bien
+
+    SELECT COUNT(*) FROM ventas;
+    SELECT * FROM ventas LIMIT 10;
+
+
+
