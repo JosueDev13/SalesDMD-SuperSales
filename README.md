@@ -100,3 +100,68 @@
         "Profit" as ganancia
     FROM ventas;
 
+
+# Ventas totales por año y mes
+    SELECT 
+        t.año,
+        t.mes_nombre,
+        SUM(f.ventas_netas) as ventas_totales,
+        SUM(f.unidades_vendidas) as unidades_totales,
+        SUM(f.ganancia) as ganancia_total
+    FROM fact_ventas f
+    JOIN dim_tiempo t ON f.fecha = t.fecha
+    GROUP BY t.año, t.mes_nombre, t.mes_numero
+    ORDER BY t.año, t.mes_numero;
+
+# Top 5 productos con más ganancias
+
+    SELECT 
+        p.nombre_producto,
+        SUM(f.ganancia) as ganancia_total,
+        SUM(f.unidades_vendidas) as unidades_vendidas
+    FROM fact_ventas f
+    JOIN dim_producto p ON f.producto_id = p.producto_id
+    GROUP BY p.nombre_producto
+    ORDER BY ganancia_total DESC
+    LIMIT 5;
+
+# Ventas por segmento de cliente y país
+
+    SELECT 
+        COALESCE(s.nombre_segmento, 'TOTAL') as segmento,
+        COALESCE(p.nombre_pais, 'TOTAL') as pais,
+        SUM(f.ventas_netas) as ventas_totales,
+        SUM(f.ganancia) as ganancia_total
+    FROM fact_ventas f
+    LEFT JOIN dim_segmento s ON f.segmento_id = s.segmento_id
+    LEFT JOIN dim_pais p ON f.pais_id = p.pais_id
+    GROUP BY ROLLUP(s.nombre_segmento, p.nombre_pais)
+    ORDER BY segmento, pais;
+
+# Análisis de rentabilidad (Profit Margin) por producto y año
+    
+    SELECT 
+        p.nombre_producto,
+        t.año,
+        SUM(f.ventas_netas) as ventas,
+        SUM(f.ganancia) as ganancia,
+        ROUND(100.0 * SUM(f.ganancia) / NULLIF(SUM(f.ventas_netas), 0), 2) as margen_porcentaje
+    FROM fact_ventas f
+    JOIN dim_producto p ON f.producto_id = p.producto_id
+    JOIN dim_tiempo t ON f.fecha = t.fecha
+    GROUP BY p.nombre_producto, t.año
+    ORDER BY t.año, margen_porcentaje DESC;
+
+# Comparativa de descuentos vs ventas
+
+    SELECT 
+        CASE 
+            WHEN f.descuentos = 0 THEN 'Sin descuento'
+            WHEN f.descuentos < 1000 THEN 'Descuento bajo'
+            ELSE 'Descuento alto'
+        END as categoria_descuento,
+        COUNT(*) as cantidad_transacciones,
+        SUM(f.ventas_netas) as ventas_totales,
+        AVG(f.ganancia / NULLIF(f.unidades_vendidas, 0)) as ganancia_promedio_por_unidad
+    FROM fact_ventas f
+    GROUP BY categoria_descuento;
