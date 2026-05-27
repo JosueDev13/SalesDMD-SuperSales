@@ -1,5 +1,8 @@
+# Instalacion harlequin
+    pip3 install harlequin
 
-
+# se ejecuta 
+    harlequin ventas-informe.duckdb
 
 # Instalar una herramienta para conversión
 
