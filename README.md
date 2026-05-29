@@ -1,3 +1,9 @@
+
+#     ============================================
+#           Instalación de complementos
+#     ============================================
+
+#     ===================================================================================================
 # Instalacion harlequin
     pip3 install harlequin
 
@@ -29,6 +35,16 @@
     
     duckdb ventas.db
 
+#     ===================================================================================================
+
+
+
+
+#     ============================================
+#                 Tablas de hechos
+#     ============================================
+
+
 # Crear la tabla de hechos
 
     CREATE OR REPLACE TABLE ventas AS 
@@ -57,6 +73,15 @@
 # Verificar si hay profits negativos.
 
     SELECT COUNT(*) as perdidas FROM ventas WHERE "Profit" < 0;
+
+
+#     ===================================================================================================
+
+
+
+#     ============================================
+#                 Tablas de dimensión
+#     ============================================
 
 
 # Dimensión Producto
@@ -102,6 +127,14 @@
         "COGS" as costo_ventas,
         "Profit" as ganancia
     FROM ventas;
+
+#     ===================================================================================================
+
+
+
+#     ============================================
+#                    Consultas
+#     ============================================
 
 
 # Ventas totales por año y mes
@@ -171,6 +204,8 @@
 
 
 
+#     ===================================================================================================
+
 
 # Adicional
     
@@ -179,6 +214,8 @@
       UNION ALL SELECT 'dim_pais', COUNT(*) FROM dim_pais
       UNION ALL SELECT 'dim_tiempo', COUNT(*) FROM dim_tiempo
       UNION ALL SELECT 'fact_ventas', COUNT(*) FROM fact_ventas;
+
+#     ===================================================================================================
 
 # Como un select
 
@@ -195,45 +232,43 @@
     WHERE table_name = 'fact_ventas'
     ORDER BY ordinal_position;
 
+#     ===================================================================================================
 
 
--- ============================================
--- SCRIPT DE EXPORTACIÓN COMPLETO
--- ============================================
+#     ============================================
+#            SCRIPT DE EXPORTACIÓN COMPLETO
+#     ============================================
 
--- 1. Esquema
-COPY (
-    SELECT table_name, column_name, data_type 
-    FROM information_schema.columns 
-    WHERE table_name LIKE 'dim_%' OR table_name = 'fact_ventas'
-) TO '00_esquema_completo.csv' WITH (HEADER);
+# 1. Esquema
+    COPY (
+        SELECT table_name, column_name, data_type 
+        FROM information_schema.columns 
+        WHERE table_name LIKE 'dim_%' OR table_name = 'fact_ventas'
+    ) TO '00_esquema_completo.csv' WITH (HEADER);
 
--- 2. Dimensiones
-COPY dim_producto TO '01_dim_producto.csv' WITH (HEADER);
-COPY dim_segmento TO '02_dim_segmento.csv' WITH (HEADER);
-COPY dim_pais TO '03_dim_pais.csv' WITH (HEADER);
-COPY dim_tiempo TO '04_dim_tiempo.csv' WITH (HEADER);
+# 2. Dimensiones
+    COPY dim_producto TO '01_dim_producto.csv' WITH (HEADER);
+    COPY dim_segmento TO '02_dim_segmento.csv' WITH (HEADER);
+    COPY dim_pais TO '03_dim_pais.csv' WITH (HEADER);
+    COPY dim_tiempo TO '04_dim_tiempo.csv' WITH (HEADER);
 
--- 3. Hechos
-COPY fact_ventas TO '05_fact_ventas.csv' WITH (HEADER);
+# 3. Hechos
+    COPY fact_ventas TO '05_fact_ventas.csv' WITH (HEADER);
 
--- 4. Resultados de análisis
-COPY (
-    SELECT t.año, t.mes_nombre, SUM(f.ventas) AS ventas, SUM(f.ganancia) AS ganancia
-    FROM fact_ventas f JOIN dim_tiempo t ON f.fecha = t.fecha
-    GROUP BY t.año, t.mes_nombre, t.mes_num ORDER BY t.año, t.mes_num
-) TO '06_analisis_ventas_mensuales.csv' WITH (HEADER);
-
-COPY (
-    SELECT p.nombre_producto, SUM(f.ganancia) AS ganancia, SUM(f.unidades) AS unidades
-    FROM fact_ventas f JOIN dim_producto p ON f.id_producto = p.id_producto
-    GROUP BY p.nombre_producto ORDER BY ganancia DESC LIMIT 5
-) TO '07_analisis_top5_productos.csv' WITH (HEADER);
-
-SELECT 'Exportación completada. Revisa los archivos CSV en tu carpeta.' AS mensaje;
-
-
-
+# 4. Resultados de análisis
+    COPY (
+        SELECT t.año, t.mes_nombre, SUM(f.ventas) AS ventas, SUM(f.ganancia) AS ganancia
+        FROM fact_ventas f JOIN dim_tiempo t ON f.fecha = t.fecha
+        GROUP BY t.año, t.mes_nombre, t.mes_num ORDER BY t.año, t.mes_num
+    ) TO '06_analisis_ventas_mensuales.csv' WITH (HEADER);
+    
+    COPY (
+        SELECT p.nombre_producto, SUM(f.ganancia) AS ganancia, SUM(f.unidades) AS unidades
+        FROM fact_ventas f JOIN dim_producto p ON f.id_producto = p.id_producto
+        GROUP BY p.nombre_producto ORDER BY ganancia DESC LIMIT 5
+    ) TO '07_analisis_top5_productos.csv' WITH (HEADER);
+    
+    SELECT 'Exportación completada, funco xd' AS mensaje;
 
 
 
